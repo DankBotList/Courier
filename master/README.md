@@ -1,0 +1,1 @@
+**The code in this folder is based on the [gorilla websocket chat example](https://github.com/gorilla/websocket/tree/master/examples/chat), and subject to the licencing thereof.**
