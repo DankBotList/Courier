@@ -1,6 +1,7 @@
 package courier
 
 import (
+	"github.com/DankBotList/Courier/master"
 	"github.com/gin-gonic/gin"
 	"github.com/olahol/melody"
 )
@@ -9,6 +10,8 @@ import (
 type Instance struct {
 	melody *melody.Melody
 	engine *gin.Engine
+	config Config
+	hub    *master.Hub
 
 	InstanceID string
 }
@@ -18,7 +21,20 @@ func New(engine *gin.Engine) (i *Instance, err error) {
 	i = &Instance{
 		melody: melody.New(),
 		engine: engine,
+		config: Config{},
 	}
+
+	if err = i.config.Load(); err != nil {
+		return
+	}
+
+	i.hub = master.NewHub(i.config.AuthenticationKey)
+
+	engine.GET(i.config.WebSocketPath, func(ctx *gin.Context) {
+		i.hub.ServeWs(ctx.Writer, ctx.Request)
+	})
+
+	// TODO build stuffs
 
 	return
 }
@@ -26,8 +42,4 @@ func New(engine *gin.Engine) (i *Instance, err error) {
 // SetInstanceID sets the instance id to be used when communicating
 func (i *Instance) SetInstanceID(id string) {
 	i.InstanceID = id
-}
-
-func (i *Instance) handler(ctx *gin.Context) {
-
 }

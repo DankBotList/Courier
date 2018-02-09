@@ -112,3 +112,46 @@ func (c *Config) Load() error {
 	return nil
 
 }
+
+// ========== Hosts.
+type Host struct {
+}
+
+// HostsData the data for hosts, their locations and ID's.
+type HostsData struct {
+	Data     `json:"-"`
+	DataFile string `json:"-"`
+	Hosts    []Host `json:"hosts"`
+}
+
+func (c *HostsData) SetDataFile(dataFile string) {
+	c.DataFile = dataFile
+}
+
+// Save saves the config.
+func (c *HostsData) Save() error {
+	if c.DataFile == "" {
+		return c.save("courier/data/hosts.json", c)
+	} else {
+		return c.save(c.DataFile, c)
+	}
+}
+
+// Load loads the config.
+func (c *HostsData) Load() error {
+	saveLoc := "courier/data/hosts.json"
+	if c.DataFile != "" {
+		saveLoc = c.DataFile
+	}
+
+	if err := c.load(saveLoc, c); err == DefaultConfigSavedError {
+		if err := DefaultConfig.Save(); err != nil {
+			return err
+		}
+		return DefaultConfigSavedError
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}

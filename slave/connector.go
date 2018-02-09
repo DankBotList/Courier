@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/DankBotList/Courier/messaging"
 	"github.com/gorilla/websocket"
 )
 
@@ -19,7 +20,7 @@ type Client struct {
 }
 
 // NewClient creates a new client.
-func NewClient(url url.URL) (*Client, error) {
+func NewClient(url url.URL, authKey string, callback func(conn *websocket.Conn, message messaging.Message)) (*Client, error) {
 
 	var err error
 	ret := &Client{
@@ -35,22 +36,14 @@ func NewClient(url url.URL) (*Client, error) {
 	go func() {
 		defer ret.socketConn.Close()
 		defer close(ret.done)
-		for {
-			msgType, message, err := ret.socketConn.ReadMessage()
-			if err != nil || msgType == websocket.CloseMessage {
-				return
-			}
+		ret.socketConn.WriteMessage(websocket.TextMessage, []byte(authKey)) // TODO AUTH KEY
 
-			switch msgType {
-			case websocket.CloseMessage:
-				return
-			case websocket.TextMessage:
-				// todo text message handle
-				break
-			case websocket.PingMessage:
-				ret.socketConn.WriteMessage(websocket.PongMessage, message)
-			case websocket.PongMessage:
-			case websocket.BinaryMessage:
+		for {
+			var message messaging.Message
+			if err := ret.socketConn.ReadJSON(&message); err != nil {
+				// TODO error..
+			} else {
+				callback(ret.socketConn, message)
 			}
 
 		}

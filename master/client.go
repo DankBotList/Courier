@@ -52,7 +52,7 @@ type Client struct {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump() {
+func (c *Client) readPump(authKey string) {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -71,9 +71,9 @@ func (c *Client) readPump() {
 				break
 			}
 			if msgType != websocket.TextMessage {
-				if string(message) == "" { // TODO authentication.
+				if string(message) == authKey { // TODO authentication.
 					c.authenticated = true
-					continue
+					break
 				} else {
 					return
 				}
