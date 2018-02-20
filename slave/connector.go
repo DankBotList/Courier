@@ -36,7 +36,7 @@ func NewClient(url url.URL, authKey string, callback func(conn *websocket.Conn, 
 	go func() {
 		defer ret.socketConn.Close()
 		defer close(ret.done)
-		ret.socketConn.WriteMessage(websocket.TextMessage, []byte(authKey)) // TODO AUTH KEY
+		ret.socketConn.WriteMessage(websocket.TextMessage, []byte(authKey))
 
 		for {
 			var message messaging.Message

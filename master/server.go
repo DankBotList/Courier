@@ -92,7 +92,6 @@ func (h *Hub) ServeWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client := &Client{hub: h, conn: conn, send: make(chan interface{}, 256)}
-	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.

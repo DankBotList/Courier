@@ -71,8 +71,9 @@ func (c *Client) readPump(authKey string) {
 				break
 			}
 			if msgType != websocket.TextMessage {
-				if string(message) == authKey { // TODO authentication.
+				if string(message) == authKey {
 					c.authenticated = true
+					c.hub.register <- c
 					break
 				} else {
 					return
